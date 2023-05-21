@@ -15,6 +15,9 @@ const yogaApp = createYoga<RequestEvent>({
 				users: async (source, {start, limit}, context, info) => {
 					await new Promise((fulfil) => setTimeout(fulfil, 1000 * Math.floor(Math.random()*1 + 1)))
 					return users.slice(start, start + limit);
+				},
+				totalUserCount: async () => {
+					return users.length
 				}
 			}
 		}

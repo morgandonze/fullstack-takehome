@@ -4,7 +4,6 @@
 	import Loader from 'components/Loader.svelte';
 	import User from 'components/User.svelte';
 	import type { UserType } from 'lib/types';
-	import { to_number } from 'svelte/internal';
 
 	const client = createClient({
 		url: '/graphql',
@@ -16,12 +15,16 @@
 	let endIndex = loadLimit;
 	let loadedUsers: any[] = [];
 	const inviewOptions = {};
+	let totalCount = 0;
 
 	function sleep(ms: number) {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	$: result = queryStore<{ users: UserType[] }>({
+	$: result = queryStore<{
+		totalUserCount: number;
+		users: UserType[];
+	}>({
 		client,
 		query: gql`
 			query {
@@ -31,11 +34,13 @@
 					avatar
 					email
 				}
+				totalUserCount
 			}
 		`
 	});
 
 	$: if ($result.data) {
+		totalCount = $result.data.totalUserCount;
 		loadedUsers = [...loadedUsers, ...$result.data.users];
 	}
 </script>
@@ -43,7 +48,7 @@
 <div class="w-full h-full overflow-scroll">
 	<div class="flex flex-col gap-4 items-center p-4">
 		{#each loadedUsers as user (user.id)}
-			{#if parseInt(user.id) != endIndex}
+			{#if parseInt(user.id) != endIndex || endIndex == totalCount}
 				<User {user} />
 			{:else}
 				<div
@@ -51,6 +56,7 @@
 					on:inview_enter={(event) => {
 						startIndex = startIndex + loadLimit;
 						endIndex = endIndex + loadLimit;
+						console.log(`Requesting ${startIndex} to ${endIndex}`);
 					}}
 				>
 					<User {user} />
