@@ -6,5 +6,5 @@ type User {
 }
 
 type Query {
-	users: [User]
+	users(start: Int, limit: Int): [User]
 }

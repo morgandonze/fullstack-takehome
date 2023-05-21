@@ -12,7 +12,10 @@ const yogaApp = createYoga<RequestEvent>({
 		typeDefs: schema,
 		resolvers: {
 			Query: {
-				users: (source, args, context, info) => users
+				users: async (source, {start, limit}, context, info) => {
+					await new Promise((fulfil) => setTimeout(fulfil, 1000 * Math.floor(Math.random()*1 + 1)))
+					return users.slice(start, start + limit);
+				}
 			}
 		}
 	}),
